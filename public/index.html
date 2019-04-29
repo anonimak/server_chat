@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Socket.IO Chat Example</title>
+  <!-- Required meta tags -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #ta-frame {
+      margin: 0;
+      padding: 10px 10px;
+      /* width: 230px; */
+      border-top: 1px solid gray;
+      background-color: #eee;
+    }
+
+    textarea {
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      width: 100%;
+      font-size: 20px;
+      resize: none;
+    }
+  </style>
+</head>
+
+<body>
+  <ul class="pages">
+    <li class="chat page">
+      <nav class="navbar fixed-top navbar-light bg-dark navbar-dark">
+        <div class="nav navbar-nav">
+          <a class="nav-item nav-link active" href="#"><i class="fa fa-comments" aria-hidden="true"></i> ATI Chat <span
+              class="sr-only">(current)</span></a>
+        </div>
+      </nav>
+      <!-- <nav class="navbar navbar-expand-sm navbar-fixed-top bg-dark navbar-dark">
+        <div class="nav navbar-nav">
+          <a class="nav-item nav-link active" href="#"><i class="fa fa-comments" aria-hidden="true"></i> ATI Chat <span
+              class="sr-only">(current)</span></a>
+        </div>
+      </nav> -->
+      <div class="chatArea">
+        <ul class="messages"></ul>
+      </div>
+      <div id="ta-frame" class="fixed-bottom">
+        <textarea id="inputSend" rows='1' class="form-control py-2 border-right-0 border"
+          placeholder="Type a message"></textarea>
+      </div>
+      <!-- <div class="input-group"> -->
+      <!-- <input class="form-control py-2 border-right-0 border" type="search" value="search" id="inputSend"> -->
+      <!-- <span class="input-group-append">
+          <button class="btn btn-outline-secondary border-left-0 border" type="button">
+            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+          </button>
+        </span> -->
+      <!-- </div> -->
+      <!-- <input class="inputMessage" placeholder="Type here..." /> -->
+    </li>
+    <li class="login page">
+      <div class="jumbotron text-center">
+        <h4><i class="fa fa-comments"></i> ATI Chat App</h4>
+        <br>
+        <strong>Halo, Selamat Datang. </strong>
+        <p>
+          Layanan ini tersedia setiap Senin-Jumat (pukul 08.00-17.00 WIB), kecuali hari
+          libur nasional.</p>
+        <small class="form-text text-muted">Silahkan registrasi chat dibawah ini.</small>
+      </div>
+      <!-- <div class="form">
+        <h3 class="title">What's your nickname?</h3>
+        <input class="input usernameInput" type="text" maxlength="14" />
+        <input class="input emailInput" type="email" maxlength="50" />
+        <input class="input telpInput" type="tel" maxlength="17" />
+      </div> -->
+      <div class="col-12">
+        <form action="#">
+          <div class="form-group">
+            <label for="">Username</label>
+            <input type="text" class="form-control" name="" id="username" aria-describedby="Username"
+              placeholder="Username">
+            <!-- <small id="helpId" class="form-text text-muted">Help text</small> -->
+          </div>
+          <div class="form-group">
+            <label for="">Email</label>
+            <input type="text" class="form-control" name="" id="email" aria-describedby="helpId" placeholder="Email">
+            <small id="helpId" class="form-text text-muted">(Optional)</small>
+          </div>
+          <div class="form-group">
+            <label for="">Telephone</label>
+            <input type="text" class="form-control" name="" id="telp" aria-describedby="helpId" placeholder="Telephone">
+            <small id="helpId" class="form-text text-muted">(Optional)</small>
+          </div>
+          <button id="btn-register" type="submit" class="btn btn-primary btn-block">Start Chat</button>
+          <br>
+        </form>
+      </div>
+    </li>
+  </ul>
+
+  <!-- <div class="footer-copyright text-center py-3">© 2018 Copyright:
+    <a href="https://cloudtech.id" target="_blank"> PT. Awan Teknologi Inovasi</a>
+  </div> -->
+  <script>
+    var div = document.querySelector('#ta-frame');
+    var ta = document.querySelector('textarea');
+
+    ta.addEventListener('keydown', autosize);
+
+    function autosize() {
+      setTimeout(function () {
+        ta.style.cssText = 'height:auto; padding:0';
+        var height = Math.min(20 * 5, ta.scrollHeight);
+        var div_height = height + 20;
+        div.style.cssText = 'height:' + div_height + 'px';
+        ta.style.cssText = 'height:' + height + 'px';
+      }, 0);
+    }
+  </script>
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/main.js"></script>
+</body>
+
+</html>
