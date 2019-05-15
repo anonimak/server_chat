@@ -57,7 +57,8 @@ $(function () {
         'username': username,
         'email': email,
         'telp': telp,
-        'level': 'visitor'
+        'level': 'visitor',
+        'product_id': '1'
       };
 
       // Tell the server your username

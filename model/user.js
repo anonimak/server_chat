@@ -23,6 +23,10 @@ module.exports = class User {
         this.id = id;
     }
 
+    setSocketId(socket_id) {
+        this.socket_id = socket_id;
+    }
+
     save() {
         return db.execute(
             "INSERT INTO `" + this.table + "` (id, name, nick_name, email, pass, status, role) VALUES (NULL,?,?,?,?,?,?)",
@@ -30,10 +34,10 @@ module.exports = class User {
         );
     }
 
-    updateStatus() {
+    updateStatusSocket() {
         return db.execute(
-            "UPDATE " + this.table + " SET `status` = ? WHERE `id` = ?",
-            [this.status, this.id]
+            `UPDATE ${this.table} SET status = ?, socket_id = ? WHERE id = ?`,
+            [this.status, this.socket_id, this.id]
         );
     }
 

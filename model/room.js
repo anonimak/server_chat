@@ -2,12 +2,13 @@ var db = require('../database/mysql2');
 
 module.exports = class Room {
 
-    set_room(room_id, name, email, telp, status_room) {
+    set_room(room_id, name, email, telp, status_room, product_id) {
         this.room_id = room_id;
         this.name = name;
         this.email = email;
         this.telp = telp;
         this.status_room = status_room;
+        this.product_id = product_id;
     }
 
     setRoomId(room_id) {
@@ -30,23 +31,41 @@ module.exports = class Room {
         this.status_room = status_room;
     }
 
+    setProductId(product_id) {
+        this.product_id = product_id;
+    }
+
     save() {
         return db.execute(
-            'INSERT INTO `room` (id, room_id, name, email, telp, status_room) VALUES (NULL,?,?,?,?,?)',
-            [this.room_id, this.name, this.email, this.telp, this.status_room]
+            'INSERT INTO `room` (id, room_id, name, email, telp, status_room, product_id) VALUES (NULL,?,?,?,?,?,?)',
+            [this.room_id, this.name, this.email, this.telp, this.status_room, this.product_id]
         );
     }
 
-    getRoomByStatusRoom(status_room) {
+    getStatus() {
+        return this.status_room;
+    }
+
+    // getRoomByStatusRoom(status_room) {
+    //     return db.execute(
+    //         "SELECT a.* FROM `room` AS `a` WHERE `a`.status_room = ? AND `a`.room_id NOT IN (SELECT `room_id` FROM `room_detail_cs` WHERE `room_id` = `a`.room_id)",
+    //         [status_room]
+    //     );
+    // }
+
+    getRoomByProduct(status_room, product_id) {
         return db.execute(
-            "SELECT a.* FROM `room` AS `a` WHERE `a`.status_room = ? AND `a`.room_id NOT IN (SELECT `room_id` FROM `room_detail_cs` WHERE `room_id` = `a`.room_id)",
-            [status_room]
+            `SELECT * 
+                FROM room 
+                WHERE status_room = ? 
+                AND product_id = ?`,
+            [status_room, product_id]
         );
     }
 
     updateStatusRoom(status_room, room_id) {
         return db.execute(
-            'UPDATE `room` SET `status_room` = ? WHERE `room_id` = ?',
+            `UPDATE room SET status_room = ? WHERE room_id = ?`,
             [status_room, room_id]
         );
     }

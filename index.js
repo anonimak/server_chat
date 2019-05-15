@@ -7,16 +7,17 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 
 const Room = require('./model/room');
-const Room_detail_cs = require('./model/room_detail_cs');
 const User = require('./model/user');
 
 
 // caching
 const NodeCache = require("node-cache");
-const Cache = new NodeCache();
+const Cache = new NodeCache({
+  stdTTL: 86400,
+  checkperiod: 0
+});
 
 var room = new Room;
-var room_detail = new Room_detail_cs;
 var user = new User;
 
 server.listen(port, () => {
@@ -102,6 +103,7 @@ io.on('connection', (socket) => {
     addedUser = true;
 
     socket.username = data.username;
+    socket.product_id = data.product_id;
 
     // if level visitor
     if (socket.level == 'visitor') {
@@ -111,7 +113,7 @@ io.on('connection', (socket) => {
       console.log('user ' + socket.level + socket.username + ' join room ' + socket.id);
 
       // insert to database
-      room.set_room(socket.id, socket.username, data.email, data.telp, 'opened');
+      room.set_room(socket.id, socket.username, data.email, data.telp, 'opened', data.product_id);
       room.save()
         .then(() => {
           console.log("success add room");
@@ -121,7 +123,7 @@ io.on('connection', (socket) => {
         })
         .catch(err => console.log(err));
 
-      get_visitor();
+      get_visitor(data.product_id);
 
       // send notification
       socket.broadcast.emit('notification');
@@ -148,10 +150,11 @@ io.on('connection', (socket) => {
       // var cs = map_cs.get(socket.id);
       // console.log(Array.from(map_cs));
 
-      // update status cs to online
+      // update status cs to online and status
       user.setStatus(1);
       user.setId(socket.user_id);
-      user.updateStatus()
+      user.setSocketId(socket.id);
+      user.updateStatusSocket()
         .then(() => {
           console.log("success update status user online");
         })
@@ -198,6 +201,12 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('customer product online', (data) => {
+    // console.log(id);
+    // get customer by product where status = opened
+    getRoomByProduct(data.id);
+  });
+
   // save conversation to cache
   const save_conversation = (key, obj) => {
     // obj = { from: "from", msg:"blah", timestamp:"dd/mm/yyyy hh:ii:ss" };
@@ -229,14 +238,21 @@ io.on('connection', (socket) => {
   });
 
   // Ketika cs join ke room visitor
-  socket.on('cs join room', (room) => {
+  socket.on('cs join room', (data) => {
     // join room visitor
-    socket.join(room.room_id);
-    socket.room_id = room.room_id;
-    console.log('user ' + socket.level + socket.username + ' join room ' + room.room_id);
-    data = 'admin join chat';
-    room.updateStatusRoom('taked', room.room_id);
-    // socket.broadcast.to(room.room_id).emit('new message', {
+
+    socket.join(data.room_id);
+    socket.room_id = data.room_id;
+    console.log('user ' + socket.level + socket.username + ' join room ' + data.room_id);
+    // data = 'admin join chat';
+    room_id = data.room_id;
+    room.updateStatusRoom('taked', room_id)
+      .then(() => {
+        console.log("success update status cs");
+      })
+      .catch(err => console.log(err));
+
+    // socket.broadcast.to(room.room_id).emit('log', {
     //   // do something
     //   username: socket.username,
     //   level: socket.level
@@ -257,18 +273,21 @@ io.on('connection', (socket) => {
   });
 
   // get user handled by id_cs
-  socket.on('chat list', (id_cs) => {
-    room_detail.getBy_idcs(id_cs)
+  socket.on('chat list', (id_product) => {
+    room.getRoomByProduct('taked', id_product)
       .then(([rows, fieldData]) => {
         // console.log(rows);
-        socket.emit('chat list', rows);
+        socket.emit('chat list', {
+          id_product: id_product,
+          data: rows
+        });
       })
       .catch(err => console.log(err));
   });
 
 
   socket.on('visitor online', () => {
-    get_visitor();
+    get_visitor(socket.product_id);
   });
 
   // when the user disconnects.. perform this
@@ -293,23 +312,23 @@ io.on('connection', (socket) => {
         //   username: socket.username,
         //   numUsers: numUsers
         // });
-        socket.broadcast.to(socket.room_id).emit('user left', {
-          username: socket.username,
-          numUsers: numUsers
+        socket.broadcast.to(socket.id).emit('user left', {
+          username: socket.username
         });
         // echo cs status
-        socket.emit('user left', {
-          //   username: socket.username,
-          //   numUsers: numUsers
-        });
+        // socket.emit('user left', {
+        //     username: socket.username,
+        //     numUsers: numUsers
+        // });
 
-        get_visitor();
+        get_visitor(socket.product_id);
 
       }
     } else if (socket.level == 'cs') {
       user.setStatus(0);
       user.setId(socket.user_id);
-      user.updateStatus()
+      user.setSocketId(null);
+      user.updateStatusSocket()
         .then(() => {
           console.log("success update status user offline");
         })
@@ -323,11 +342,11 @@ io.on('connection', (socket) => {
     }
   });
 
-  const get_visitor = () => {
+  const get_visitor = (id_product) => {
     var status = "opened";
 
     // get data room from db
-    room.getRoomByStatusRoom(status)
+    room.getRoomByProduct(status, id_product)
       .then(([rows, fieldData]) => {
         // console.log(rows);
         io.emit('show visitor', rows);
@@ -335,4 +354,18 @@ io.on('connection', (socket) => {
       .catch(err => console.log(err));
   };
 
+  const getRoomByProduct = (product_id) => {
+    room.getRoomByProduct(`opened`, product_id)
+      .then(([rows, fieldData]) => {
+        // socket.emit('chat list', rows);
+        result = {
+          id: product_id,
+          data: rows
+        };
+
+        socket.emit('customer product list', result);
+        console.log(result);
+      })
+      .catch(err => console.log(err));
+  }
 });

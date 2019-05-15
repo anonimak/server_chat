@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: 29 Apr 2019 pada 04.57
+-- Generation Time: 08 Mei 2019 pada 02.40
 -- Versi Server: 5.5.60-MariaDB
 -- PHP Version: 5.4.16
 
@@ -30,9 +30,11 @@ CREATE TABLE IF NOT EXISTS `cs` (
   `id` int(4) NOT NULL,
   `name` varchar(50) NOT NULL,
   `nick_name` varchar(50) NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
   `email` varchar(50) NOT NULL,
   `pass` text NOT NULL,
   `status` tinyint(1) NOT NULL,
+  `socket_id` varchar(100) DEFAULT NULL,
   `date_add` datetime NOT NULL,
   `date_modify` datetime NOT NULL,
   `user_id` int(10) NOT NULL
@@ -42,8 +44,8 @@ CREATE TABLE IF NOT EXISTS `cs` (
 -- Dumping data untuk tabel `cs`
 --
 
-INSERT INTO `cs` (`id`, `name`, `nick_name`, `email`, `pass`, `status`, `date_add`, `date_modify`, `user_id`) VALUES
-(1, 'rizal', 'jono', 'admin@gmail.com', '0b1e50e1fd71c96bac94144cc59cff40', 1, '2019-04-15 00:00:00', '0000-00-00 00:00:00', 1);
+INSERT INTO `cs` (`id`, `name`, `nick_name`, `phone`, `email`, `pass`, `status`, `socket_id`, `date_add`, `date_modify`, `user_id`) VALUES
+(1, 'rizal', 'jono', NULL, 'admin@gmail.com', '0b1e50e1fd71c96bac94144cc59cff40', 0, NULL, '2019-04-15 00:00:00', '0000-00-00 00:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -117,9 +119,9 @@ CREATE TABLE IF NOT EXISTS `m_product` (
 --
 
 INSERT INTO `m_product` (`product_id`, `product_name`, `product_description`, `product_image`, `id`, `date_add`, `date_modify`, `category_id`, `user_id`) VALUES
-(1, 'Cu/PVC 450/750 V (NYA) SNI 04.6629.3 Rp/m', 'Spesification : SPLN 42-1/SH 0208\r\nRated Voltage : 450/750 Volt', '090419105614.png', NULL, '2019-03-13 00:32:00', '2019-04-09 17:56:14', 12, 54),
+(1, 'Cu/PVC 450/750 V (NYA) SNI 04.6629.3 Rp/m', 'Spesification : SPLN 42-1/SH 0208\r\nRated Voltage : 450/750 Volt', '090419105614.png', 1, '2019-03-13 00:32:00', '2019-04-09 17:56:14', 12, 54),
 (2, 'Cu/PVC/PVC 300/500 V (NYM) SNI 04.6629.4 Rp/m', 'Spesification : SPLN 42-2\r\nRated Voltage : 300/500 Volt', 'ym.png', NULL, '2019-03-13 00:35:00', '2019-03-13 00:35:00', 1, 50),
-(3, 'Cu/PVC/PVC/PVC 0.6/1 KV (NYY) SNI IEC 60502-1 Rp/m', 'Application : Bare copper conductor half hard or hard, used for grounding conductor', '090419105104.png', NULL, '2019-03-13 00:15:00', '2019-04-26 13:37:15', 2, 54),
+(3, 'Cu/PVC/PVC/PVC 0.6/1 KV (NYY) SNI IEC 60502-1 Rp/m', 'Application : Bare copper conductor half hard or hard, used for grounding conductor', '090419105104.png', 2, '2019-03-13 00:15:00', '2019-04-26 13:37:15', 2, 54),
 (4, 'Cu/PVC/SWA/PVC 0.6/1 KV (NYRGbY) SNI IEC 60502-1 Rp/m', 'All aluminium conductor, used for overhead transmission & distribution\r\n', '090419105239.png', NULL, '2019-03-13 00:16:00', '2019-04-26 11:35:51', 1, 54);
 
 -- --------------------------------------------------------
@@ -252,7 +254,15 @@ CREATE TABLE IF NOT EXISTS `room` (
   `status_room` enum('opened','taked','deleted') NOT NULL DEFAULT 'opened',
   `product_id` int(4) NOT NULL,
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data untuk tabel `room`
+--
+
+INSERT INTO `room` (`id`, `room_id`, `name`, `email`, `telp`, `status_room`, `product_id`, `creation_date`) VALUES
+(1, 'a', 'a', 'a', '09631089469', 'taked', 1, '2019-04-30 04:56:17'),
+(4, 'q8PPjbSjjqiJlZeNAAAC', 'ATI@cloudtech.id', 'sanonimak@gmail.com', '09631089469', 'taked', 1, '2019-05-03 08:20:31');
 
 -- --------------------------------------------------------
 
@@ -421,7 +431,7 @@ ALTER TABLE `notify`
 -- AUTO_INCREMENT for table `room`
 --
 ALTER TABLE `room`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `slider`
 --
