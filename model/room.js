@@ -53,6 +53,15 @@ module.exports = class Room {
     //     );
     // }
 
+    getRoomByRoomId(room_id){
+        return db.execute(
+            `SELECT *
+                FROM room
+                WHERE room_id = ?`,
+            [room_id]
+        );
+    }
+
     getRoomByProduct(status_room, product_id) {
         return db.execute(
             `SELECT * 

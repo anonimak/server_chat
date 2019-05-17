@@ -40,23 +40,23 @@ io.on('connection', (socket) => {
   socket.on('new message', (data) => {
 
     if (socket.level == 'visitor') {
-      console.log('visitor send to ' + socket.id);
+      console.log('visitor send to ' + socket.room_id);
       // we tell the client to execute 'new message'
-      socket.broadcast.to(socket.id).emit('new message', {
-        id: socket.id,
+      socket.broadcast.to(socket.room_id).emit('new message', {
+        id: socket.room_id,
         username: socket.username,
         message: data,
         timestamp: Date.now()
       });
 
-      save_conversation(socket.id, {
+      save_conversation(socket.room_id, {
         username: socket.username,
         message: data,
         timestamp: Date.now()
       });
 
       try {
-        value = Cache.get(socket.id, true);
+        value = Cache.get(socket.room_id, true);
         console.log(value);
       } catch (err) {
         console.log(err);
@@ -108,25 +108,42 @@ io.on('connection', (socket) => {
     // if level visitor
     if (socket.level == 'visitor') {
 
+      // create room
+      let room_id = data.product_id + data.username;
+
+      socket.room_id = room_id;
+
       // join room
-      socket.join(socket.id);
-      console.log('user ' + socket.level + socket.username + ' join room ' + socket.id);
+      socket.join(room_id);
+      console.log('user ' + socket.level + socket.username + ' join room ' + room_id);
 
-      // insert to database
-      room.set_room(socket.id, socket.username, data.email, data.telp, 'opened', data.product_id);
-      room.save()
-        .then(() => {
-          console.log("success add room");
-          // 
-
-
-        })
-        .catch(err => console.log(err));
+      // TO DO
+      // check if exist room
+      room.getRoomByRoomId(room_id)
+      .then(([results, fieldData]) => {
+        if(typeof results !== 'undefined' && results.length > 0){
+          // update status room
+          console.log(results);
+          room.updateStatusRoom('opened',room_id).then(() => {
+            console.log("success update status to opened room "+ room_id);
+          }).catch(err => console.log(err));
+        } else {
+          // insert to room
+          room.set_room(room_id, socket.username, data.email, data.telp, 'opened', data.product_id);
+          room.save()
+            .then(() => {
+              console.log("success add room");
+              // 
+            })
+            .catch(err => console.log(err));
+        }
+      })
+      .catch(err => console.log(err));
 
       get_visitor(data.product_id);
 
       // send notification
-      socket.broadcast.emit('notification');
+      socket.broadcast.emit('notification', data.product_id);
 
     } else if (socket.level == 'cs') {
       socket.room_id = data.room;
@@ -296,11 +313,11 @@ io.on('connection', (socket) => {
     if (socket.level == 'visitor') {
       if (addedUser) {
 
-        socket.leave(socket.id);
-        console.log('user ' + socket.username + ' leave room ' + socket.id);
+        socket.leave(socket.room_id);
+        console.log('user ' + socket.username + ' leave room ' + socket.room_id);
 
         var room = new Room;
-        room.updateStatusRoom('deleted', socket.id)
+        room.updateStatusRoom('deleted', socket.room_id)
           .then(() => {
             console.log("success remove room");
 
@@ -312,7 +329,7 @@ io.on('connection', (socket) => {
         //   username: socket.username,
         //   numUsers: numUsers
         // });
-        socket.broadcast.to(socket.id).emit('user left', {
+        socket.broadcast.to(socket.room_id).emit('user left', {
           username: socket.username
         });
         // echo cs status
