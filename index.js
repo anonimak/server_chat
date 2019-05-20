@@ -244,8 +244,11 @@ io.on('connection', (socket) => {
   socket.on('delete conversation', (key) => {
     Cache.del(key, function (err, count) {
       if (!err) {
-        console.log(count); // 1
-        // ... do something ...
+        console.log(count); 
+        room.deleteByRoomId(key).then(() => {
+          console.log(`room ${key} deleted.`);
+          socket.emit('delete conversation');
+        }).catch(err => console.log(err));
       }
     });
   });
