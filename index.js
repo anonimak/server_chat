@@ -40,51 +40,51 @@ io.on('connection', (socket) => {
   socket.on('new message', (data) => {
 
     if (socket.level == 'visitor') {
-      console.log('visitor send to ' + socket.room_id);
+      console.log('visitor send to ' + data.room_id);
       // we tell the client to execute 'new message'
-      socket.broadcast.to(socket.room_id).emit('new message', {
-        id: socket.room_id,
+      socket.broadcast.to(data.room_id).emit('new message', {
+        id: data.room_id,
         username: socket.username,
-        message: data,
+        message: data.msg,
         timestamp: Date.now()
       });
 
-      save_conversation(socket.room_id, {
+      save_conversation(data.room_id, {
         username: socket.username,
-        message: data,
+        message: data.msg,
         timestamp: Date.now()
       });
 
       try {
-        value = Cache.get(socket.room_id, true);
+        value = Cache.get(data.room_id, true);
         console.log(value);
       } catch (err) {
         console.log(err);
       }
 
     } else if (socket.level == 'cs') {
-      console.log('cs send to ' + socket.room_id);
+      console.log('cs send to ' + data.room_id);
 
       // save to session chat
-      socket.broadcast.to(socket.room_id).emit('new message', {
-        id: socket.id,
+      socket.broadcast.to(data.room_id).emit('new message', {
+        id: data.room_id,
         username: socket.username,
         nick_name: socket.nick_name,
-        message: data,
+        message: data.msg,
         timestamp: Date.now()
       });
 
       // save to cache
       // obj = { from: "from", message:"blah", timestamp:"dd/mm/yyyy hh:ii:ss" };
-      save_conversation(socket.room_id, {
+      save_conversation(data.room_id, {
         username: socket.username,
         nick_name: socket.nick_name,
-        message: data,
+        message: data.msg,
         timestamp: Date.now()
       });
 
       try {
-        value = Cache.get(socket.room_id, true);
+        value = Cache.get(data.room_id, true);
         console.log(value);
       } catch (err) {
         console.log(err);
@@ -94,13 +94,16 @@ io.on('connection', (socket) => {
 
   // when the client emits 'add user', this listens and executes
   socket.on('add user', (data) => {
-    if (addedUser) return;
+    // if (addedUser){
+    //   console.log('udah');
+    // return;
+    // }
 
     // we store the username in the socket session for this client
     socket.level = data.level;
 
-    ++numUsers;
-    addedUser = true;
+    // ++numUsers;
+    // addedUser = true;
 
     socket.username = data.username;
     socket.product_id = data.product_id;
@@ -146,26 +149,18 @@ io.on('connection', (socket) => {
       socket.broadcast.emit('notification', data.product_id);
 
     } else if (socket.level == 'cs') {
-      socket.room_id = data.room;
       socket.user_id = data.user_id;
       socket.nick_name = data.nick_name;
       socket.role = data.role;
-
       // join room visitor
       // socket.join(socket.room_id);
-      console.log('user ' + socket.level + socket.username + ' join room ' + socket.room_id);
-
-      // insert into array user live
-      // var obj_user = {
-      //   "user_id": data.user_id,
-      //   "username": data.username,
-      //   "role": data.role
-      // };
-
-      // map_cs.set(socket.id, obj_user);
-
-      // var cs = map_cs.get(socket.id);
-      // console.log(Array.from(map_cs));
+      room.getRoomByIdCs(data.user_id).then(([results, fieldData]) => {
+        if(typeof results !== 'undefined' && results.length > 0){
+          console.log('data_room',results);
+        } else {
+          console.log('kosong');
+        }
+      }).catch(err => console.log(err));
 
       // update status cs to online and status
       user.setStatus(1);
@@ -212,6 +207,7 @@ io.on('connection', (socket) => {
   socket.on('load conversation', (key) => {
     try {
       value = Cache.get(key.room_id, true);
+      console.log('load conversation', value);
       socket.emit('load conversation', value);
     } catch (err) {
       console.log(err);
@@ -291,9 +287,9 @@ io.on('connection', (socket) => {
 
   // get user handled by id_cs
   socket.on('chat list', (id_product) => {
-    room.getRoomByProduct('taked', id_product)
+    room.getRoomByProductTaked('taked', id_product)
       .then(([rows, fieldData]) => {
-        // console.log(rows);
+        console.log('chat list',rows);
         socket.emit('chat list', {
           id_product: id_product,
           data: rows
@@ -344,7 +340,7 @@ io.on('connection', (socket) => {
     } else if (socket.level == 'cs') {
       user.setStatus(0);
       user.setId(socket.user_id);
-      user.setSocketId(null);
+      user.setSocketId(socket.id);
       user.updateStatusSocket()
         .then(() => {
           console.log("success update status user offline");

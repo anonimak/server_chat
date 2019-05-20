@@ -66,9 +66,33 @@ module.exports = class Room {
         return db.execute(
             `SELECT * 
                 FROM room 
+                WHERE status_room = ?
+                AND product_id = ?`,
+            [status_room, product_id]
+        );
+    }
+
+    getRoomByProductTaked(status_room, product_id){
+        return db.execute(
+            `SELECT * 
+                FROM room 
                 WHERE status_room = ? 
                 AND product_id = ?`,
             [status_room, product_id]
+        );
+    }
+
+    getRoomByIdCs(id){
+        return db.execute(
+            `SELECT a.room_id FROM room AS a 
+            LEFT JOIN m_product AS b
+            ON a.product_id = b.product_id
+            LEFT JOIN cs AS c
+            ON b.id = c.id
+            WHERE a.status_room = 'taked'
+            AND a.status_room = 'deleted'
+            AND c.id = ?`,
+            [id]
         );
     }
 
