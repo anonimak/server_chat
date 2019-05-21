@@ -13,7 +13,8 @@ const User = require('./model/user');
 // caching
 const NodeCache = require("node-cache");
 const Cache = new NodeCache({
-  stdTTL: 86400,
+  // stdTTL: 86400,
+  stdTTL:18000,
   checkperiod: 0
 });
 
