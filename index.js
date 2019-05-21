@@ -34,7 +34,7 @@ var map_cs = new Map();
 var map_conversation = new Map();
 
 io.on('connection', (socket) => {
-  var addedUser = false;
+  var addedUser = [];
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
@@ -94,16 +94,12 @@ io.on('connection', (socket) => {
 
   // when the client emits 'add user', this listens and executes
   socket.on('add user', (data) => {
-    // if (addedUser){
-    //   console.log('udah');
-    // return;
-    // }
 
     // we store the username in the socket session for this client
     socket.level = data.level;
 
     // ++numUsers;
-    // addedUser = true;
+    statususer = false;
 
     socket.username = data.username;
     socket.product_id = data.product_id;
@@ -113,12 +109,32 @@ io.on('connection', (socket) => {
 
       // create room
       let room_id = data.product_id + data.username;
-
+      
       socket.room_id = room_id;
 
       // join room
       socket.join(room_id);
       console.log('user ' + socket.level + socket.username + ' join room ' + room_id);
+
+
+      get_visitor(data.product_id);
+
+      // check user already added.
+      if(addedUser.length > 0){
+        addedUser.forEach(function(v){
+          if(v == room_id){
+            console.log('visitor:',`${socket.username} telah ter add.`);
+            statususer = true;
+          }
+        });
+      }
+
+      if (statususer) {
+        return;
+      }
+
+      // send notification
+      socket.broadcast.emit('notification', data.product_id);
 
       // TO DO
       // check if exist room
@@ -143,10 +159,8 @@ io.on('connection', (socket) => {
       })
       .catch(err => console.log(err));
 
-      get_visitor(data.product_id);
-
-      // send notification
-      socket.broadcast.emit('notification', data.product_id);
+      // push to addedUser
+      addedUser.push(room_id);
 
     } else if (socket.level == 'cs') {
       socket.user_id = data.user_id;
@@ -154,18 +168,18 @@ io.on('connection', (socket) => {
       socket.role = data.role;
       // join room visitor
       // socket.join(socket.room_id);
-      room.getRoomByIdCs(data.user_id).then(([results, fieldData]) => {
-        if(typeof results !== 'undefined' && results.length > 0){
-          console.log('data_room',results);
-        } else {
-          console.log('kosong');
-        }
+      room.getRoomByIdCs(data.user_id).then(([rows, fields]) => {
+          rows.forEach(function(row){
+            console.log(row.room_id);
+            socket.join(row.room_id);
+          });
       }).catch(err => console.log(err));
 
       // update status cs to online and status
+      console.log(socket.id);
       user.setStatus(1);
       user.setId(socket.user_id);
-      user.setSocketId(socket.id);
+      // user.setSocketId(socket.id);
       user.updateStatusSocket()
         .then(() => {
           console.log("success update status user online");
@@ -206,9 +220,16 @@ io.on('connection', (socket) => {
   // load conversation from cache
   socket.on('load conversation', (key) => {
     try {
-      value = Cache.get(key.room_id, true);
-      console.log('load conversation', value);
-      socket.emit('load conversation', value);
+      Cache.get(key.room_id,function( err, value ){
+        if( !err ){
+          if(value == undefined){
+            socket.emit('load conversation', {});
+          }else{
+            console.log('load conversation', value);
+            socket.emit('load conversation', value);
+          } 
+        }
+      });
     } catch (err) {
       console.log(err);
     }
@@ -228,7 +249,7 @@ io.on('connection', (socket) => {
     try {
       value = Cache.get(key, true);
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       value = [];
     }
 
@@ -249,6 +270,8 @@ io.on('connection', (socket) => {
           console.log(`room ${key} deleted.`);
           socket.emit('delete conversation');
         }).catch(err => console.log(err));
+
+        addedUser = [];
       }
     });
   });
@@ -310,8 +333,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     --numUsers;
     if (socket.level == 'visitor') {
-      if (addedUser) {
-
         socket.leave(socket.room_id);
         console.log('user ' + socket.username + ' leave room ' + socket.room_id);
 
@@ -339,7 +360,6 @@ io.on('connection', (socket) => {
 
         get_visitor(socket.product_id);
 
-      }
     } else if (socket.level == 'cs') {
       user.setStatus(0);
       user.setId(socket.user_id);

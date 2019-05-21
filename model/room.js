@@ -90,7 +90,7 @@ module.exports = class Room {
             LEFT JOIN cs AS c
             ON b.id = c.id
             WHERE a.status_room = 'taked'
-            AND a.status_room = 'deleted'
+            OR a.status_room = 'deleted'
             AND c.id = ?`,
             [id]
         );

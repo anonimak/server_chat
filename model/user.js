@@ -35,9 +35,14 @@ module.exports = class User {
     }
 
     updateStatusSocket() {
+        // if use socket_id
+        // return db.execute(
+        //     `UPDATE ${this.table} SET status = ? , socket_id = ? WHERE id = ?`,
+        //     [this.status, this.socket_id, this.id]
+        // );
         return db.execute(
-            `UPDATE ${this.table} SET status = ?, socket_id = ? WHERE id = ?`,
-            [this.status, this.socket_id, this.id]
+            `UPDATE ${this.table} SET status = ? WHERE id = ?`,
+            [this.status, this.id]
         );
     }
 
