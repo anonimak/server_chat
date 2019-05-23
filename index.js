@@ -10,6 +10,8 @@ var io = require('socket.io')(server, {
 });
 var port = process.env.PORT || 3000;
 
+var log = require('./config/winston');
+
 const Room = require('./model/room');
 const User = require('./model/user');
 
