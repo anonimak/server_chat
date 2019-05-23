@@ -2,8 +2,12 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var moment = require('moment');
 var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, {
+    pingInterval: 36000000,
+    pingTimeout: 5000
+});
 var port = process.env.PORT || 3000;
 
 const Room = require('./model/room');
@@ -17,6 +21,16 @@ const Cache = new NodeCache({
   stdTTL:18000,
   checkperiod: 0
 });
+
+// date
+const date = new Date;
+
+// get day
+var today = moment().weekday();
+
+// set limit time
+const limit_time = date.setHours(18,0,0,0);
+console.log('limit time:',limit_time);
 
 var room = new Room;
 var user = new User;
@@ -36,7 +50,6 @@ var map_conversation = new Map();
 
 io.on('connection', (socket) => {
   var addedUser = [];
-
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
 
@@ -49,6 +62,29 @@ io.on('connection', (socket) => {
         message: data.msg,
         timestamp: Date.now()
       });
+
+      
+      // date now
+      let now = Date.now();
+
+      // check time
+      if(now <= limit_time || today == 0 || today == 6){
+
+        let msg = ``;
+        if(socket.region == "ID"){
+          msg =`Terimakasih telah menghubungi PT. Sucaco. \nSaat ini sudah melewati jam operasional kami (Senin-Jum'at 08-17). \nMohon hubungi kami kembali pada jam oprasional atau hubungi no Whatsapp yang tertera pada detail produk. \n - Auto Generated Message -`;
+        } else {
+          msg =`Thankyou for contacting PT. Sucaco. \nOur office operation time (Mon-Fri 08-17). \nPlease contact us again at our office hour or contact the Whatsapp number which shown at detail product. \n - Auto Generated Message -`;
+        }
+
+        socket.emit('bot new message', {
+          id: data.room_id,
+          username: "Automatic Response",
+          message: msg,
+          timestamp: Date.now()
+        });
+        return;
+      }
 
       save_conversation(data.room_id, {
         username: socket.username,
@@ -113,9 +149,32 @@ io.on('connection', (socket) => {
       
       socket.room_id = room_id;
 
+      // region
+      socket.region = data.region;
+
       // join room
       socket.join(room_id);
       console.log('user ' + socket.level + socket.username + ' join room ' + room_id);
+
+      // date now
+      let now = Date.now();
+
+      if(now <= limit_time || today == 0 || today == 6){
+
+        let msg = ``;
+        if(data.region == "ID"){
+          msg =`Terimakasih telah menghubungi PT. Sucaco. \nSaat ini sudah melewati jam operasional kami (Senin-Jum'at 08-17). \nMohon hubungi kami kembali pada jam oprasional atau hubungi no Whatsapp yang tertera pada detail produk. \n - Auto Generated Message -`;
+        } else {
+          msg =`Thankyou for contacting PT. Sucaco. \nOur office operation time (Mon-Fri 08-17). \nPlease contact us again at our office hour or contact the Whatsapp number which shown at detail product. \n - Auto Generated Message -`;
+        }
+
+        socket.emit('bot new message', {
+          id: room_id,
+          username: "BOT",
+          message:msg,
+          timestamp: Date.now()
+        });
+      }
 
 
       get_visitor(data.product_id);
@@ -270,9 +329,10 @@ io.on('connection', (socket) => {
         room.deleteByRoomId(key).then(() => {
           console.log(`room ${key} deleted.`);
           socket.emit('delete conversation');
+          socket.broadcast.to(key).emit('close chat');
         }).catch(err => console.log(err));
 
-        addedUser = [];
+        return addedUser = [];
       }
     });
   });
