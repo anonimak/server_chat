@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
       if(now <= limit_time || today == 0 || today == 6){
 
         let msg = ``;
-        if(socket.region == "ID"){
+        if(socket.region == "IND"){
           msg =`Terimakasih telah menghubungi PT. Sucaco. \nSaat ini sudah melewati jam operasional kami (Senin-Jum'at 08-17). \nMohon hubungi kami kembali pada jam oprasional atau hubungi no Whatsapp yang tertera pada detail produk. \n - Auto Generated Message -`;
         } else {
           msg =`Thankyou for contacting PT. Sucaco. \nOur office operation time (Mon-Fri 08-17). \nPlease contact us again at our office hour or contact the Whatsapp number which shown at detail product. \n - Auto Generated Message -`;
@@ -164,7 +164,7 @@ io.on('connection', (socket) => {
       if(now <= limit_time || today == 0 || today == 6){
 
         let msg = ``;
-        if(data.region == "ID"){
+        if(data.region == "IND"){
           msg =`Terimakasih telah menghubungi PT. Sucaco. \nSaat ini sudah melewati jam operasional kami (Senin-Jum'at 08-17). \nMohon hubungi kami kembali pada jam oprasional atau hubungi no Whatsapp yang tertera pada detail produk. \n - Auto Generated Message -`;
         } else {
           msg =`Thankyou for contacting PT. Sucaco. \nOur office operation time (Mon-Fri 08-17). \nPlease contact us again at our office hour or contact the Whatsapp number which shown at detail product. \n - Auto Generated Message -`;
