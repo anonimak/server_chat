@@ -25,13 +25,11 @@ const Cache = new NodeCache({
 });
 
 // date
-const date = new Date;
+// const date = new Date;
+const limit_time = moment('17:00', 'HH:mm');
 
-// get day
-var today = moment().weekday();
+var isLimit = false;
 
-// set limit time
-const limit_time = date.setHours(18,0,0,0);
 console.log('limit time:',limit_time);
 
 var room = new Room;
@@ -67,10 +65,18 @@ io.on('connection', (socket) => {
 
       
       // date now
-      let now = Date.now();
+      let now = moment();
+      // get day
+      var today = now.weekday();
+      
+      if(now.isSameOrAfter(limit_time) || today == 0 || today == 6){
+        isLimit = true
+      } else {
+        isLimit = false
+      }
 
       // check time
-      if(now <= limit_time || today == 0 || today == 6){
+      if(isLimit){
 
         let msg = ``;
         if(socket.region == "IND"){
@@ -159,10 +165,22 @@ io.on('connection', (socket) => {
       console.log('user ' + socket.level + socket.username + ' join room ' + room_id);
 
       // date now
-      let now = Date.now();
+      let now = moment();
+      // get day
+      var today = now.weekday();
 
-      if(now <= limit_time || today == 0 || today == 6){
+      console.log("now hour", now.get('minute'));
+      console.log("limit hour", limit_time.get('minute'));
+      
+      if(now.isSameOrAfter(limit_time) || today == 0 || today == 6){
+        isLimit = true
+      } else {
+        isLimit = false
+      }
 
+      if(isLimit){
+        console.log("limit time", limit_time);
+        console.log("now", now);
         let msg = ``;
         if(data.region == "IND"){
           msg =`Terimakasih telah menghubungi PT. Sucaco. \nSaat ini sudah melewati jam operasional kami (Senin-Jum'at 08-17). \nMohon hubungi kami kembali pada jam oprasional atau hubungi no Whatsapp yang tertera pada detail produk. \n - Auto Generated Message -`;

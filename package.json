@@ -1,11 +1,12 @@
 {
-    "name": "socket.io-chat",
-    "version": "0.0.0",
-    "description": "A simple chat client using socket.io",
+    "name": "sucaco.server.chat",
+    "version": "1.1.2",
+    "description": "server chat untuk apps sucaco",
+    "displayName": "server chat",
     "main": "index.js",
-    "author": "Grant Timmerman",
+    "author": "Anonimak",
     "private": true,
-    "license": "BSD",
+    "license": "unlicense",
     "dependencies": {
         "app-root-path": "^2.2.1",
         "express": "^4.16.4",
