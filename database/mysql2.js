@@ -10,7 +10,7 @@ var db = mysql.createPool(config_db);
 //         return;
 //     }
 
-//     console.log('connected as id ' + db.threadId);
+//    console.log('connected as id ' + db.threadId);
 // });
 
 module.exports = db.promise();

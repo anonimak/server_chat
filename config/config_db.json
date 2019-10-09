@@ -2,6 +2,6 @@
     "host": "localhost",
     "user": "sucaco",
     "password": "Sucaco123!@#",
-    "database": "db_sucaco"
-
+    "database": "db_sucaco",
+    "socketPath": "/var/run/mysqld/mysqld.sock"
 }

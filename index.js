@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
       // get day
       var today = now.weekday();
       
-      if(now.isSameOrAfter(limit_time) || today == 0 || today == 6){
+      if(now.get('hour') > limit_time.get('hour') && now.get('minute') > limit_time.get('minute') || today == 0 || today == 6){
         isLimit = true
       } else {
         isLimit = false
@@ -169,10 +169,10 @@ io.on('connection', (socket) => {
       // get day
       var today = now.weekday();
 
-      console.log("now hour", now.get('minute'));
-      console.log("limit hour", limit_time.get('minute'));
+      console.log("now hour", now.get('hour'));
+      console.log("limit hour", limit_time.get('hour'));
       
-      if(now.isSameOrAfter(limit_time) || today == 0 || today == 6){
+      if(now.get('hour') > limit_time.get('hour') && now.get('minute') > limit_time.get('minute') || today == 0 || today == 6){
         isLimit = true
       } else {
         isLimit = false
