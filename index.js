@@ -315,10 +315,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('customer product online', (data) => {
+  socket.on('customer product online', () => {
     // console.log(id);
     // get customer by product where status = opened
-    getRoomByProduct(data.id);
+    getRooms();
   });
 
   // save conversation to cache
@@ -393,12 +393,11 @@ io.on('connection', (socket) => {
   });
 
   // get user handled by id_cs
-  socket.on('chat list', (id_product) => {
-    room.getRoomByProductTaked('taked', id_product)
+  socket.on('chat list', () => {
+    room.getRoomTaked('taked')
       .then(([rows, fieldData]) => {
         console.log('chat list',rows);
         socket.emit('chat list', {
-          id_product: id_product,
           data: rows
         });
       })
@@ -463,10 +462,15 @@ io.on('connection', (socket) => {
     var status = "opened";
 
     // get data room from db
-    room.getRoomByProduct(status, id_product)
+    room.getRooms(`opened`)
       .then(([rows, fieldData]) => {
-        // console.log(rows);
-        io.emit('show visitor', rows);
+        // socket.emit('chat list', rows);
+        result = {
+          data: rows
+        };
+
+        io.emit('show visitor', result);
+        console.log(result);
       })
       .catch(err => console.log(err));
   };
@@ -477,6 +481,20 @@ io.on('connection', (socket) => {
         // socket.emit('chat list', rows);
         result = {
           id: product_id,
+          data: rows
+        };
+
+        socket.emit('customer product list', result);
+        console.log(result);
+      })
+      .catch(err => console.log(err));
+  }
+
+  const getRooms = () => {
+    room.getRooms(`opened`)
+      .then(([rows, fieldData]) => {
+        // socket.emit('chat list', rows);
+        result = {
           data: rows
         };
 

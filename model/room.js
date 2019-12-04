@@ -62,6 +62,25 @@ module.exports = class Room {
         );
     }
 
+    getRooms(status_room) {
+        return db.execute(
+            `SELECT * 
+                FROM room 
+                WHERE status_room = ?`,
+            [status_room]
+        );
+    }
+
+
+    getRoomTaked(status_room){
+        return db.execute(
+            `SELECT * 
+                FROM room 
+                WHERE status_room = ?`,
+            [status_room]
+        );
+    }
+
     getRoomByProduct(status_room, product_id) {
         return db.execute(
             `SELECT * 
