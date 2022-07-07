@@ -10,7 +10,7 @@
     "dependencies": {
         "app-root-path": "^2.2.1",
         "express": "^4.16.4",
-        "moment": "^2.24.0",
+        "moment": "^2.29.4",
         "mysql2": "^1.6.5",
         "node-cache": "^4.2.0",
         "pm2": "^3.4.1",
